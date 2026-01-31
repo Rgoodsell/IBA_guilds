@@ -128,21 +128,21 @@ trap_id         <- all_data$trap_id[[1]]
 feeding_niche   <- unique(all_data$feeding_niche)
 
 newData  <- data.frame(week_year       =  seq(10,52,l=n_obs), 
-                    mean_w_temp     = t_trend,
-                    mean_w_prec     = 0,
-                    longitude_wgs84 = longitude_wgs84,
-                    latitude_wgs84  = latitude_wgs84 , 
-                    trap_id         = trap_id,
-                    forest_cover    = 0,
-                    crop_cover      = 0, 
-                    grass_cover     = 0,
-                    shrub_cover     = 0,
-                    sampling_time   = sampling_time) 
-  
-  predData <- replicate(6,newData , simplify = FALSE) |> 
-    bind_rows() |>
-    mutate(feeding_niche = rep(feeding_niche , each = n()/6)) 
-  
+                       mean_w_temp     = t_trend,
+                       mean_w_prec     = 0,
+                       longitude_wgs84 = longitude_wgs84,
+                       latitude_wgs84  = latitude_wgs84 , 
+                       trap_id         = trap_id,
+                       forest_cover    = 0,
+                       crop_cover      = 0, 
+                       grass_cover     = 0,
+                       shrub_cover     = 0,
+                       sampling_time   = sampling_time) 
+
+predData <- replicate(6,newData , simplify = FALSE) |> 
+  bind_rows() |>
+  mutate(feeding_niche = rep(feeding_niche , each = n()/6)) 
+
 # Predict
 predData$species_richness <- predict(mod , newdata = predData , exclude = "s(trap_id)" , type = "response")
 predData <- predData |> 
@@ -159,10 +159,10 @@ tList    <- list()
 
 # Loop over guilds to estimate peaks of each guild * trend
 for(i in seq_along(guilds)){
-    gData      <- filter(predData , feeding_niche == guilds[i])
-    peakList[[i]] <- simulate_MAP_max(gData , mod , n_sim = 100 , qint = c(0.1 , 0.9)) |> 
-                  bind_rows() |>
-                  mutate(feeding_niche = guilds[i])
+  gData      <- filter(predData , feeding_niche == guilds[i])
+  peakList[[i]] <- simulate_MAP_max(gData , mod , n_sim = 100 , qint = c(0.1 , 0.9)) |> 
+    bind_rows() |>
+    mutate(feeding_niche = guilds[i])
 }
 
 
