@@ -8,11 +8,11 @@ library(data.table)
 # load community data -----------------------------------------------------------------------------------
 
 # OTU data
-IBA_taxa         <- fread("data/IBA_data/consensus.SE.taxonomy.tsv")  |> clean_names()
-IBA_clusters     <- fread("data/IBA_data/CO1_lysate_2019_SE.cleaned.clusters.counts.tsv") |> clean_names()
-IBA_seq_meta     <- fread("data/IBA_data/CO1_sequencing_metadata_SE.tsv")  |> clean_names()
-IBA_malaise_meta <- fread("data/IBA_data/samples_metadata_malaise_SE_2019.tsv") |> clean_names()
-IBA_trap_meta    <- fread("data/IBA_data/traps_metadata_SE_2019.tsv") |> clean_names()
+IBA_taxa         <- fread("data/raw_data/IBA_data/consensus.SE.taxonomy.tsv")  |> clean_names()
+IBA_clusters     <- fread("data/raw_data/IBA_data/CO1_lysate_2019_SE.cleaned.clusters.counts.tsv") |> clean_names()
+IBA_seq_meta     <- fread("data/raw_data/IBA_data/CO1_sequencing_metadata_SE.tsv")  |> clean_names()
+IBA_malaise_meta <- fread("data/raw_data/IBA_data/samples_metadata_malaise_SE_2019.tsv") |> clean_names()
+IBA_trap_meta    <- fread("data/raw_data/IBA_data/traps_metadata_SE_2019.tsv") |> clean_names()
 
 
 # functions -----------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ get_sf <- function(class_tr_sub){
 # Assemble seq data
 taxa_counts <- full_join(IBA_taxa , IBA_clusters , by = "cluster") |> 
                 melt(id.vars = 1:9 , variable.name = "sample_id_ngi" , value.name = "read_count") |> 
-                filter(read_count > 0 , phylum == "Arthropoda")|> 
+                filter(read_count > 10 , phylum == "Arthropoda")|> 
                  mutate(sample_id_ngi = str_replace(sample_id_ngi , "p" , "P"))
 
 

@@ -11,14 +11,6 @@ get_env_s <- function(week_year,k,envar , n_obs){
 
 
 # Function to build new data to simulate changes in environment
-#! Not sure if the Gaussian approximation of the posterior is working well here when there are very few observations !
-#! For some groups it ends up with the model making high SR estimates very early in the the year !
-#! For now I have limited the prediction period to be from week 10 to avoid this when estimating SR peaks !
-#! Ideally we should implement something more sensible !
-
-#! As a quick and dirty option for some preliminary results, this uses a gam fit from our observations as the seasonal temp + prec components
-#! Need to fix this so that we get a better observation of temperature to simulate from. Maybe fit from all data from COPERNICUS?
-
 build_new_data <- function(fit_data, m_obj ,n_obs, t_temp , t_prec , delta_temp , delta_prec) {
   # fit_data   = data that model was fit to
   # m_obj      = fitted gam 
@@ -70,17 +62,31 @@ simulate_MAP_max <- function(phen_dat , m_obj , n_sim, qint = c(0.1, 0.9)){
   Vbdist    <- MASS::mvrnorm(n_sim, beta, Vb) # Random draws from joint distribution
   
   # Loop over mv distribution and calculate the maximum SR
-  opt   <- rep(NA, n_sim)
+  opt      <- rep(NA, n_sim)
+  pstart   <- rep(NA, n_sim)
+  pend     <- rep(NA, n_sim)
+  
   pred  <- vector(mode = "list" , length = n_sim)
   ilink <- family(m_obj)$linkinv 
   
   for (i in seq_len(n_sim)) { 
     pred[[i]]   <- ilink((Xp %*% Vbdist[i, ]) +  m.offset)  # save predicted curve 
     opt[i]      <- phen_dat$week_year[which.max(pred[[i]])] # save peak SR
+    
+    phix       <- min(pred[[i]]) + max(pred[[i]]) /100 * 5 # get 5% of maximum species richness as an indicator of the start / end of season phenostates
+    phase_ix   <- phen_dat$week_year[which(pred_r<phix)] # 
+    pstart[i]  <- max(phase_ix[phase_ix<(26)])
+    pend[i]    <- min(phase_ix[phase_ix>(26)])
   }
+
+  peak   <- median(opt)
+  p_ci   <- quantile(opt, qint)
+  start  <- median(pstart,na.rm = TRUE)
+  s_ci   <- quantile(pstart, qint)
+  end  <- median(pend,na.rm=TRUE)
+  e_ci   <- quantile(pend, qint)
   
-  peak   <- phen_dat$week_year[which.max(pred_r)]
-  ci     <- quantile(opt, qint)
+  
   
   # data.frame of different curves from simulated coefs
   # sim_df <- tibble(week_year = rep(phen_dat$week_year,times=n_sim), 
@@ -88,7 +94,14 @@ simulate_MAP_max <- function(phen_dat , m_obj , n_sim, qint = c(0.1, 0.9)){
   #           mutate(sim = rep(1:n_sim, each=nrow(phen_dat)))
   
 
-  out <-  data.frame(peak = peak , upr = ci[2] , lwr = ci[1]) 
+  out <-  data.frame(peak_est = peak   , peak_upr = p_ci[2] , peak_lwr = p_ci[1],
+                     start_est = start , start_upr = s_ci[2] , start_lwr = s_ci[1],
+                     end_est = end     , end_upr = e_ci[2] , end_lwr = e_ci[1]) |> 
+    pivot_longer(
+      everything(),
+      names_to = c("phase", ".value"),
+      names_pattern = "(.*)_(.*)"
+    ) 
   return(out)
 }
 

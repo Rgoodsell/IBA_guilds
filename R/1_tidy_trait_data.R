@@ -10,7 +10,7 @@ library(VIM)          # Provides functions for handling missing data
 # raw data --------------------------------------------------------------------
 
 # cluster taxonomy
-IBA_taxa <- read_tsv("data/IBA_data/CO1_cleaned_nochimera_cluster_taxonomy_SE_2019.tsv") |>
+IBA_taxa <- read_tsv("data/raw_data/IBA_data/CO1_cleaned_nochimera_cluster_taxonomy_SE_2019.tsv") |>
             filter(Phylum == "Arthropoda")
 
 # Read raw body mass data from CSV file and clean the column names
@@ -195,7 +195,7 @@ all_traits_sub <- full_join(tidy_body_mass, tidy_feeding_niche_hörren, by = c("
                                                          sub_family == "Cryptochetidae" ~ "Phytophate-parasitoid" , 
                                                          sub_family == "Eginiidae"      ~ "Saprophage-parasitoid" , 
                                                          sub_family == "Leucospidae"    ~ "Phytophage-parasitoid" , 
-                                                         higher_taxon == "Aranea"       ~ "Predators",
+                                                         higher_taxon == "Aranea"       ~ "Predator",
                                                          TRUE ~ main_feeding_niche_ronquist)) |> 
         mutate(higher_taxon = case_when(family == "Isotomidae" ~ "Entomobryomorpha" , TRUE ~ higher_taxon))
 
