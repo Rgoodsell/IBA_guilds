@@ -1,13 +1,3 @@
----
-title: "Repository README"
-author: "Your Name"
-date: "`r Sys.Date()`"
-output:
-  html_document:
-    df_print: paged
-  pdf_document: default
----
-
 # Repository Overview
 
 This repository contains data, scripts, and figures for the preliminary analyses of invertebrate functional trait data derived from the [Insect Biome Atlas project](https://www.insectbiomeatlas.org/). 
