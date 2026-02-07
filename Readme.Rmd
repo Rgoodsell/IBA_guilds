@@ -1,3 +1,8 @@
+---
+output: rmarkdown::github_document
+
+---
+
 # Repository Overview
 
 This repository contains data, scripts, and figures for the preliminary analyses of invertebrate functional trait data derived from the [Insect Biome Atlas project](https://www.insectbiomeatlas.org/). 
